@@ -50,6 +50,10 @@ apartments_filtered[41533,] # Looks like a bit of a problem: 10 bathrooms, 2 bed
 apartments_filtered[39670,] # Looks fine
 apartments_filtered[15469,] # Looks fine too 
 
+apartments_lm2 <- lm(log(price) ~ bedrooms + bathrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + doorman + near_restaurants_1_5_miles, data=apartments_filtered)
+summary(apartments_lm2)
+
+
 # Round 2)
 # 21247, 31297, 10647
 apartments_filtered[21247, ]
@@ -70,9 +74,15 @@ apartments_full <- apartments_filtered |>
 
 # That looks mostly good, thats the apartment features
 # Now we will look at the neighborhood features
-neighborhood_features <- read.csv("master_final.csv")
+neighborhood_features <- read.csv("master_final_with_scores.csv")
 
-head(neighborhood_features)
+apartments_full <- apartments_full |> mutate(neighborhood = neighborhood_master)
+
+full_data <- apartments_full |> left_join(neighborhood_features, by="neighborhood")
+head(full_data)
+
+full_model <- lm(log(price) ~ bedrooms + bathrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + doorman + near_restaurants_1_5_miles + median_income.y + vacancy_rate.y + movement_score.y + green_score.y, data=full_data)
+summary(full_model)
 
 # features: 
 # neighborhood
