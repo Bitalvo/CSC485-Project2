@@ -202,3 +202,28 @@ final_model2 <- lm(
 )
 
 summary(final_model2)
+
+
+#Save
+library(readr)
+
+master_final_with_scores <- master_final |>
+  mutate(
+    education_score = scaled_df$education_score,
+    movement_score = scaled_df$movement_score,
+    restaurant_score = scaled_df$restaurant_score,
+    green_score = scaled_df$green_score
+  )
+
+write_csv(
+  master_final_with_scores,
+  "C:\\Users\\pbita\\OneDrive - Providence College\\--DataSci Capstone\\CSC485-Project2\\data sources\\master_final_with_scores.csv"
+)
+
+
+write_csv(
+  master_final_with_scores,
+  "master_final_with_scores.csv"
+)
+
+
