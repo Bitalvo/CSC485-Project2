@@ -5,13 +5,25 @@ format: html
 editor: visual
 ---
 
-## Quarto
+## Introduction
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+Over the past decade, data analytics has become an essential tool for understanding real estate markets, especially in massive complex markets like New York City. Rental prices are influenced by a wide range of factors like income accessibility, amenities, neighborhood and so much more. While there are many contribution factors, it’s difficult to determine which of these truly drive rental prices, and how they interact with one another.
 
-## Running Code
+This project’s goal is to analyze what features best predict apartment rental prices across New York City. In particular, the goal is to identify which economic, geographic, and lifestyle factors are most strongly associated with median asking rent of an individual apartment. We analyzed features on both the individual apartment level and neighborhood level to quantify how much individual characteristics impact pricing compared to community characteristics.
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+To address this question, a wide range of data was collected at both the apartment and neighborhood levels. At the apartment level, features such as the number of bedrooms and bathrooms, as well as building amenities like in-unit laundry and doorman services, were included. At the neighborhood level, more general characteristics were gathered, including average apartment sale prices, measures of neighborhood safety, school quality, and accessibility factors such as ease of movement and transportation options. Statistical methods, including LASSO regression, random forest regression, multiple linear regression, were then applied to identify the most important predictors of rent and quantify their impact.
+
+The goal of this analysis is to better understand the key drivers of rental pricing in New York City and determine whether factors such as accessibility and amenities have a measurable impact beyond basic economic indicators like income and property values.
+
+## Data Overview
+
+The neighborhood dataset acts as a supplement to the apartment data the project is absed on. It contains aggregated information from 37 neighborhoods across New York City, with each row representing a new area. Its important to note that Neighborhood name is not recorded exactly the same across the datasets gathered which proved to be a difficult obstacle when cleaning and creating the final neighborhood data set. For example, the dataset for average asking rent used names such as "Chelsea" and "Murray Hill Kips Bay" while the dataset for school information used "Chelsea/Clinton" or "Murray Hill/Stuyvesant" because school districts are recorded differently. To address this issue, neighborhood names were standardized across all datasets using a combination of automated cleaning and targeted mapping. This process involved changing all names to the same format (lowercase, removing punctuation, and trimming spaces), as well as splitting combined neighborhood names where needed. For example, rows like “Chelsea/Clinton” were separated into individual neighborhoods to match with other datasets.
+
+In addition to the automated cleaning, a small number of issues were fixed using targeted mappings to match similar or overlapping neighborhood definitions. The rent dataset was used as the base reference, or "truth" and other datasets were adjusted to match its naming structure as closely as possible.
+
+This approach helped active an impactful increase in overlap between datasets (from 9 common names to 37) so they could be joined together. Once standardized, the datasets were successfully merged using the neighborhood field, and values were aggregated when needed to make a consistent neighborhood-level dataset for analysis.
+
+\########## Going to talk about where data is from, why features were chosen, and strengenths & limitations next, —— may move this section about issues to later but leaving here for now.######
 
 ```{r}
 1 + 1
