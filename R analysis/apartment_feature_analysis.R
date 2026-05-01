@@ -67,55 +67,121 @@ library(tigris)
 apartments_filtered <- apartments_filtered |> rename(zip = zipcode)
 apartments_filtered <- apartments_filtered |> mutate(zip = as.character(zip))
 
+# That looks mostly good, thats the apartment features
+# Now we will look at the neighborhood features
+neighborhood_features <- read.csv("master_final_with_scores.csv")
+
 apartments_full <- apartments_filtered |>
   left_join(crosswalk_clean, by = "zip") |>
   left_join(neighborhood_features, by = c("neighborhood_master" = "neighborhood"))
 
 
-# That looks mostly good, thats the apartment features
-# Now we will look at the neighborhood features
-neighborhood_features <- read.csv("master_final_with_scores.csv")
-
 apartments_full <- apartments_full |> mutate(neighborhood = neighborhood_master)
 
-full_data <- apartments_full |> left_join(neighborhood_features, by="neighborhood")
 head(full_data)
 
-full_model <- lm(log(price) ~ bedrooms + bathrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + doorman + near_restaurants_1_5_miles + median_income.y + vacancy_rate.y + movement_score.y + green_score.y, data=full_data)
+library(dplyr)
+library(stringr)
+median_income <- read.csv("NYC median incomes.csv")
+# head(median_income, 1)
+median_income <- median_income |> select(NAME, S1903_C03_001E)
+median_income <- median_income |>
+  mutate(
+    zip = str_replace(NAME, "ZCTA5 ", ""),                   
+    median_income_census = as.numeric(S1903_C03_001E)
+  ) |>
+  select(zip, median_income_census)
+
+head(median_income, 5)
+
+median_income |> select(median_income_census)
+
+write.csv(median_income, "NYC_median_income.csv", row.names=FALSE)
+
+head(apartments_full)
+apartments_full <- apartments_full |>
+  left_join(median_income, by = "zip") |>
+  select(-median_income) |>             
+  rename(median_income = median_income_census) 
+
+apartments_full |> filter(is.na(median_income)) 
+
+apartments_full <- apartments_full |>
+  group_by(neighborhood_master) |>
+  mutate(
+    median_income = ifelse(
+      is.na(median_income),
+      median(median_income, na.rm = TRUE),
+      median_income
+    )
+  ) |>
+  ungroup()
+
+sum(is.na(apartments_full$median_income))
+
+apartments_full <- apartments_full |> filter(!(bedrooms == 0 & bathrooms == 0 & price >= 8000))
+apartments_full |> filter(bedrooms == 0 & bathrooms == 0) |> arrange(desc(price))
+
+# bathroom, bedroom, elevator, in.unit.wash.dryer, in.building.wash.dryer, fitness.center, outdoor.space, doorman, near_restaurants_1_5_miles, moderate_restaurants_3_miles, vacancy_rate, median_income
+
+
+full_model <- lm(log(price) ~ bathrooms + bedrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + outdoor.space + doorman + near_restaurants_1_5_miles + moderate_restaurants_3_miles + vacancy_rate + median_income, data=apartments_full)
 summary(full_model)
+plot(full_model)
+car::vif(full_model)
 
-# features: 
-# neighborhood
-# average asking rent
-# market sale price unit
-# inventory units
-# assest value billions
-# vacancy rate
-# median income
+# Very extreme hetroskedasticity. Need to look at the CRPlots and transform variables!
+car::crPlots(full_model)
 
-# early education enrollment
-# reading test scores 3rd to 8th grade
-# math test scores 3rd to 8th grade
-# graduation rate
+apartments_full[15448,]
+apartments_full[22572,]
 
-# walk score
-# transit score
-# bike score
-# subway station count
-# average routes per station
-# percent ada accessible
+apartments_full[44423,]
 
-# restaurant count
-# cuisine diversity
-# avg restaurant score
-# percent a grade
-# critical violation share
+# full_model 2, adding quadratic term for bathrooms, and a log term for median_income
+# recoding the categorical variables to be interpreted categorically, rather than as continuous variables
+apartments_full <- apartments_full |>
+  mutate(
+    elevator = factor(elevator),
+    doorman = factor(doorman),
+    fitness.center = factor(fitness.center),
+    in.unit.wash.dryer = factor(in.unit.wash.dryer),
+    in.building.wash.dryer = factor(in.building.wash.dryer),
+    outdoor.space = factor(outdoor.space),
+    pool = factor(pool),
+    parking.spot = factor(parking.spot),
+    dishwasher = factor(dishwasher),
+    furnished = factor(furnished)
+  )
 
-# green space count
-# total green acres
-# average green acres
-# percent waterfront
+full_model2 <- lm(log(price) ~ bathrooms + I(bathrooms^2) + bedrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + outdoor.space + doorman + near_restaurants_1_5_miles + moderate_restaurants_3_miles + vacancy_rate + log(median_income), data=apartments_full)
+summary(full_model2)
 
+car::crPlots(full_model2)
+plot(full_model2)
 
+# still looks pretty bad so 
+library(lmtest)
+library(sandwich)
+library(MASS)
 
+coeftest(full_model2, vcov = vcovHC(full_model2, type = "HC1"))
+# outdoor.space no longer significant
 
+robust_model <- rlm(log(price) ~ bathrooms + I(bathrooms^2) + bedrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + outdoor.space + doorman + near_restaurants_1_5_miles + moderate_restaurants_3_miles + vacancy_rate + log(median_income), data=apartments_full)
+summary(robust_model)
+car::crPlots(robust_model)
+
+predictors_in_model <- c('bathrooms', 'bedrooms', 'elevator', 'in.unit.wash.dryer', 'in.building.wash.dryer', 'fitness.center', 'outdoor.space', 'doorman', 'near_restaurants_1_5_miles', 'moderate_restaurants_3_miles', 'vacancy_rate', 'median_income')
+
+sapply(predictors_in_model, function(x) sum(is.na(apartments_full[[x]])))
+"                   bathrooms                     bedrooms                     elevator           in.unit.wash.dryer 
+                           0                            0                            0                            0 
+      in.building.wash.dryer               fitness.center                outdoor.space                      doorman 
+                           0                            0                            0                            0 
+  near_restaurants_1_5_miles moderate_restaurants_3_miles                 vacancy_rate                median_income 
+                           0                            0                          853                            0 
+"
+apartments_full <- apartments_full |> filter(!is.na(neighborhood_master))
+
+plot(robust_model)
