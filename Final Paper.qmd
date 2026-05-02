@@ -6,6 +6,25 @@ editor: visual
 ---
 
 ## Introduction
+<<<<<<< HEAD
+=======
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Data Overview
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Methodology
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Results
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Conclusion
+>>>>>>> c7350f3ec9804ef40e4d7d2d6fb1c37b11463cd1
 
 Over the past decade, data analytics has become an essential tool for understanding real estate markets, especially in massive complex markets like New York City. Rental prices are influenced by a wide range of factors like income accessibility, amenities, neighborhood and so much more. While there are many contribution factors, it’s difficult to determine which of these truly drive rental prices, and how they interact with one another.
 
