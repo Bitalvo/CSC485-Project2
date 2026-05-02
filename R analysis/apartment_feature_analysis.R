@@ -135,6 +135,8 @@ apartments_full <- apartments_full |>
 head(apartments_full[,'dist_to_cbd_km'])
 
 
+n_distinct(apartments_full$neighborhood_master)
+
 # bathroom, bedroom, elevator, in.unit.wash.dryer, in.building.wash.dryer, fitness.center, outdoor.space, doorman, near_restaurants_1_5_miles, moderate_restaurants_3_miles, vacancy_rate, median_income
 
 
@@ -237,7 +239,17 @@ library(MASS)
 coeftest(full_model2, vcov = vcovHC(full_model2, type = "HC1"))
 # outdoor.space no longer significant
 
-robust_model <- rlm(log(price) ~ bathrooms + I(bathrooms^2) + bedrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + outdoor.space + doorman + near_restaurants_1_5_miles + moderate_restaurants_3_miles + vacancy_rate + log(median_income) + dist_to_cbd_km, data=apartments_full)
+robust_model <- rlm(log(price) ~ bathrooms_c  * dist_to_cbd_c  + 
+                      I(bathrooms_c ^2)  +
+                      bedrooms * dist_to_cbd_c  + 
+                      elevator * dist_to_cbd_c  + 
+                      in.unit.wash.dryer * dist_to_cbd_c  + 
+                      in.building.wash.dryer + 
+                      fitness.center * dist_to_cbd_c  + 
+                      outdoor.space * dist_to_cbd_c  + 
+                      doorman * dist_to_cbd_c  + 
+                      moderate_restaurants_3_miles + 
+                      vacancy_rate + median_income, data = apartments_full)
 summary(robust_model)
 car::crPlots(robust_model)
 
