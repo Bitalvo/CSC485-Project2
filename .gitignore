@@ -1,2 +1,14 @@
-"data sources".DS_Store
-"Neighborhood Data"
+# Ignore specific folders
+data sources/
+Neighborhood Data/
+featuresFindings/
+Final Paper_files/
+
+# Ignore system files
+.DS_Store
+
+# Ignore RStudio junk
+.Rproj.user/
+.Rhistory
+.RData
+*.Rproj
