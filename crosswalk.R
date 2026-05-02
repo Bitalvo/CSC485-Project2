@@ -1,0 +1,259 @@
+library(tidyverse)
+
+# Crosswalk: master_final neighborhood -> zip file neighborhood(s) -> zip codes
+# Each row = one zip code, so master neighborhoods with multiple zips get multiple rows
+
+crosswalk <- tribble(
+  ~neighborhood_master,      ~neighborhood_zip,                    ~zip,
+  
+  # --- Manhattan ---
+  "upper east side",         "Upper East Side",                    "10021",
+  "upper east side",         "Upper East Side",                    "10028",
+  "upper east side",         "Upper East Side",                    "10044",
+  "upper east side",         "Upper East Side",                    "10065",
+  "upper east side",         "Upper East Side",                    "10075",
+  "upper east side",         "Upper East Side",                    "10128",
+  
+  "upper west side",         "Upper West Side",                    "10023",
+  "upper west side",         "Upper West Side",                    "10024",
+  "upper west side",         "Upper West Side",                    "10025",
+  
+  "chelsea",                 "Chelsea and Clinton",                "10001",
+  "chelsea",                 "Chelsea and Clinton",                "10011",
+  "chelsea",                 "Chelsea and Clinton",                "10018",
+  "chelsea",                 "Chelsea and Clinton",                "10019",
+  "chelsea",                 "Chelsea and Clinton",                "10036",
+  
+  "midtown east",            "Gramercy Park and Murray Hill",      "10010",
+  "midtown east",            "Gramercy Park and Murray Hill",      "10016",
+  "midtown east",            "Gramercy Park and Murray Hill",      "10017",
+  "midtown east",            "Gramercy Park and Murray Hill",      "10022",
+  
+  "midtown west",            "Chelsea and Clinton",                "10018",
+  "midtown west",            "Chelsea and Clinton",                "10019",
+  "midtown west",            "Chelsea and Clinton",                "10036",
+  
+  "midtown south",           "Chelsea and Clinton",                "10001",
+  "midtown south",           "Chelsea and Clinton",                "10011",
+  
+  "murray hillkips bay",     "Gramercy Park and Murray Hill",      "10010",
+  "murray hillkips bay",     "Gramercy Park and Murray Hill",      "10016",
+  "murray hillkips bay",     "Gramercy Park and Murray Hill",      "10017",
+  
+  "east village",            "Lower East Side",                    "10003",
+  "east village",            "Lower East Side",                    "10009",
+  
+  "lower east side",         "Lower East Side",                    "10002",
+  "lower east side",         "Lower East Side",                    "10003",
+  "lower east side",         "Lower East Side",                    "10009",
+  
+  "little italychinatown",   "Greenwich Village and Soho",         "10012",
+  "little italychinatown",   "Greenwich Village and Soho",         "10013",
+  
+  "lower west side",         "Greenwich Village and Soho",         "10012",
+  "lower west side",         "Greenwich Village and Soho",         "10013",
+  "lower west side",         "Greenwich Village and Soho",         "10014",
+  
+  "financial district",      "Lower Manhattan",                    "10004",
+  "financial district",      "Lower Manhattan",                    "10005",
+  "financial district",      "Lower Manhattan",                    "10006",
+  "financial district",      "Lower Manhattan",                    "10007",
+  "financial district",      "Lower Manhattan",                    "10038",
+  "financial district",      "Lower Manhattan",                    "10280",
+  
+  "morningside heights",     "Inwood and Washington Heights",      "10031",
+  "morningside heights",     "Inwood and Washington Heights",      "10032",
+  
+  "harlem",                  "Central Harlem",                     "10026",
+  "harlem",                  "Central Harlem",                     "10027",
+  "harlem",                  "Central Harlem",                     "10030",
+  "harlem",                  "Central Harlem",                     "10037",
+  "harlem",                  "Central Harlem",                     "10039",
+  
+  "east harlem",             "East Harlem",                        "10029",
+  "east harlem",             "East Harlem",                        "10035",
+  
+  "upper manhattan",         "Inwood and Washington Heights",      "10031",
+  "upper manhattan",         "Inwood and Washington Heights",      "10032",
+  "upper manhattan",         "Inwood and Washington Heights",      "10033",
+  "upper manhattan",         "Inwood and Washington Heights",      "10034",
+  "upper manhattan",         "Inwood and Washington Heights",      "10040",
+  
+  "roosevelt island",        "Upper East Side",                    "10044",
+  
+  # --- Brooklyn ---
+  "downtown brooklyn",       "Northwest Brooklyn",                 "11201",
+  "downtown brooklyn",       "Northwest Brooklyn",                 "11205",
+  "downtown brooklyn",       "Northwest Brooklyn",                 "11215",
+  "downtown brooklyn",       "Northwest Brooklyn",                 "11217",
+  "downtown brooklyn",       "Northwest Brooklyn",                 "11231",
+  
+  "williamsburg",            "Bushwick and Williamsburg",          "11206",
+  "williamsburg",            "Bushwick and Williamsburg",          "11221",
+  "williamsburg",            "Bushwick and Williamsburg",          "11237",
+  "williamsburg",            "Greenpoint",                         "11211",
+  "williamsburg",            "Greenpoint",                         "11222",
+  
+  "bushwick",                "Bushwick and Williamsburg",          "11206",
+  "bushwick",                "Bushwick and Williamsburg",          "11221",
+  "bushwick",                "Bushwick and Williamsburg",          "11237",
+  
+  "prospect park",           "Central Brooklyn",                   "11212",
+  "prospect park",           "Central Brooklyn",                   "11213",
+  "prospect park",           "Central Brooklyn",                   "11216",
+  "prospect park",           "Central Brooklyn",                   "11233",
+  "prospect park",           "Central Brooklyn",                   "11238",
+  
+  "flatbush",                "Flatbush",                           "11203",
+  "flatbush",                "Flatbush",                           "11210",
+  "flatbush",                "Flatbush",                           "11225",
+  "flatbush",                "Flatbush",                           "11226",
+  
+  "east new york",           "East New York and New Lots",         "11207",
+  "east new york",           "East New York and New Lots",         "11208",
+  
+  "south shore brooklyn",    "Southern Brooklyn",                  "11223",
+  "south shore brooklyn",    "Southern Brooklyn",                  "11224",
+  "south shore brooklyn",    "Southern Brooklyn",                  "11229",
+  "south shore brooklyn",    "Southern Brooklyn",                  "11235",
+  
+  "southwest brooklyn",      "Southwest Brooklyn",                 "11209",
+  "southwest brooklyn",      "Southwest Brooklyn",                 "11214",
+  "southwest brooklyn",      "Southwest Brooklyn",                 "11228",
+  
+  # --- Queens ---
+  "long island city",        "Long Island City",                   "11109",
+  "long island city",        "Northwest Queens",                   "11101",
+  "long island city",        "Northwest Queens",                   "11102",
+  "long island city",        "Northwest Queens",                   "11103",
+  "long island city",        "Northwest Queens",                   "11104",
+  "long island city",        "Northwest Queens",                   "11105",
+  "long island city",        "Northwest Queens",                   "11106",
+  
+  "northwestern queens",     "West Queens",                        "11368",
+  "northwestern queens",     "West Queens",                        "11369",
+  "northwestern queens",     "West Queens",                        "11370",
+  "northwestern queens",     "West Queens",                        "11372",
+  "northwestern queens",     "West Queens",                        "11373",
+  "northwestern queens",     "West Queens",                        "11377",
+  "northwestern queens",     "West Queens",                        "11378",
+  
+  "central queens",          "Central Queens",                     "11365",
+  "central queens",          "Central Queens",                     "11366",
+  "central queens",          "Central Queens",                     "11367",
+  "central queens",          "West Central Queens",                "11374",
+  "central queens",          "West Central Queens",                "11375",
+  "central queens",          "West Central Queens",                "11379",
+  "central queens",          "West Central Queens",                "11385",
+  
+  "northeast queens",        "Northeast Queens",                   "11361",
+  "northeast queens",        "Northeast Queens",                   "11362",
+  "northeast queens",        "Northeast Queens",                   "11363",
+  "northeast queens",        "Northeast Queens",                   "11364",
+  "northeast queens",        "North Queens",                       "11354",
+  "northeast queens",        "North Queens",                       "11355",
+  "northeast queens",        "North Queens",                       "11356",
+  "northeast queens",        "North Queens",                       "11357",
+  "northeast queens",        "North Queens",                       "11358",
+  "northeast queens",        "North Queens",                       "11360",
+  
+  "southeast queens",        "Southeast Queens",                   "11004",
+  "southeast queens",        "Southeast Queens",                   "11411",
+  "southeast queens",        "Southeast Queens",                   "11413",
+  "southeast queens",        "Southeast Queens",                   "11422",
+  "southeast queens",        "Southeast Queens",                   "11426",
+  "southeast queens",        "Southeast Queens",                   "11427",
+  "southeast queens",        "Southeast Queens",                   "11428",
+  "southeast queens",        "Southeast Queens",                   "11429",
+  "southeast queens",        "Jamaica",                            "11412",
+  "southeast queens",        "Jamaica",                            "11423",
+  "southeast queens",        "Jamaica",                            "11432",
+  "southeast queens",        "Jamaica",                            "11433",
+  "southeast queens",        "Jamaica",                            "11434",
+  "southeast queens",        "Jamaica",                            "11435",
+  "southeast queens",        "Jamaica",                            "11436",
+  
+  "south shore queens",      "Rockaways",                          "11691",
+  "south shore queens",      "Rockaways",                          "11692",
+  "south shore queens",      "Rockaways",                          "11693",
+  "south shore queens",      "Rockaways",                          "11694",
+  "south shore queens",      "Rockaways",                          "11697",
+  "south shore queens",      "Southwest Queens",                   "11414",
+  "south shore queens",      "Southwest Queens",                   "11415",
+  "south shore queens",      "Southwest Queens",                   "11416",
+  "south shore queens",      "Southwest Queens",                   "11417",
+  "south shore queens",      "Southwest Queens",                   "11418",
+  "south shore queens",      "Southwest Queens",                   "11419",
+  "south shore queens",      "Southwest Queens",                   "11420",
+  "south shore queens",      "Southwest Queens",                   "11421",
+  
+  # --- Bronx ---
+  "south bronx",             "Hunts Point and Mott Haven",         "10454",
+  "south bronx",             "Hunts Point and Mott Haven",         "10455",
+  "south bronx",             "Hunts Point and Mott Haven",         "10459",
+  "south bronx",             "Hunts Point and Mott Haven",         "10474",
+  "south bronx",             "High Bridge and Morrisania",         "10451",
+  "south bronx",             "High Bridge and Morrisania",         "10452",
+  "south bronx",             "High Bridge and Morrisania",         "10456",
+  
+  "west bronx",              "Central Bronx",                      "10453",
+  "west bronx",              "Central Bronx",                      "10457",
+  "west bronx",              "Central Bronx",                      "10460",
+  "west bronx",              "Bronx Park and Fordham",             "10458",
+  "west bronx",              "Bronx Park and Fordham",             "10467",
+  "west bronx",              "Bronx Park and Fordham",             "10468",
+  
+  "northwest bronx",         "Kingsbridge and Riverdale",          "10463",
+  "northwest bronx",         "Kingsbridge and Riverdale",          "10471",
+  
+  "east bronx",              "Northeast Bronx",                    "10466",
+  "east bronx",              "Northeast Bronx",                    "10469",
+  "east bronx",              "Northeast Bronx",                    "10470",
+  "east bronx",              "Northeast Bronx",                    "10475",
+  
+  "southeast bronx",         "Southeast Bronx",                    "10461",
+  "southeast bronx",         "Southeast Bronx",                    "10462",
+  "southeast bronx",         "Southeast Bronx",                    "10464",
+  "southeast bronx",         "Southeast Bronx",                    "10465",
+  "southeast bronx",         "Southeast Bronx",                    "10472",
+  "southeast bronx",         "Southeast Bronx",                    "10473",
+  
+  # --- Staten Island ---
+  "staten island",           "Port Richmond",                      "10302",
+  "staten island",           "Port Richmond",                      "10303",
+  "staten island",           "Port Richmond",                      "10310",
+  "staten island",           "Stapleton and St. George",           "10301",
+  "staten island",           "Stapleton and St. George",           "10304",
+  "staten island",           "Stapleton and St. George",           "10305",
+  "staten island",           "Mid-Island",                         "10314",
+  "staten island",           "South Shore",                        "10306",
+  "staten island",           "South Shore",                        "10307",
+  "staten island",           "South Shore",                        "10308",
+  "staten island",           "South Shore",                        "10309",
+  "staten island",           "South Shore",                        "10312"
+)
+
+crosswalk_clean <- crosswalk
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10001" & neighborhood_master == "midtown south"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10003" & neighborhood_master == "lower east side"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10009" & neighborhood_master == "lower east side"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10010" & neighborhood_master == "midtown east"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10011" & neighborhood_master == "midtown south"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10012" & neighborhood_master == "lower west side"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10013" & neighborhood_master == "lower west side"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10016" & neighborhood_master == "midtown east"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10017" & neighborhood_master == "murray hillkips bay"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10018" & neighborhood_master == "chelsea"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10019" & neighborhood_master == "chelsea"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10031" & neighborhood_master == "upper manhattan"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10032" & neighborhood_master == "upper manhattan"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10036" & neighborhood_master == "chelsea"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "10044" & neighborhood_master == "upper east side"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "11206" & neighborhood_master == "bushwick"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "11221" & neighborhood_master == "williamsburg"))
+crosswalk_clean <- crosswalk_clean %>% filter(!(zip == "11237" & neighborhood_master == "bushwick"))
+
+
+# Quick check: make sure all 37 master neighborhoods are covered
+cat("Master neighborhoods in crosswalk:", n_distinct(crosswalk$neighborhood_master), "\n")
+cat("Total zip code rows:", nrow(crosswalk), "\n")
