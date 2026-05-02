@@ -7,11 +7,11 @@ editor: visual
 
 ## Introduction
 
-Over the past decade, data analytics has become an essential tool for understanding real estate markets, especially in massive complex markets like New York City. Rental prices are influenced by a wide range of factors like income accessibility, amenities, neighborhood and so much more. While there are many contribution factors, it’s difficult to determine which of these truly drive rental prices, and how they interact with one another.
+Over the past decade, data analytics has become an essential tool for understanding real estate markets, especially in massive complex markets like New York City. For example, rental prices are influenced by a wide range of factors like income accessibility, amenities, neighborhood, and so much more. While there are many contribution factors, it’s difficult to determine which of these truly drive rental prices, and how they interact with one another.
 
-This project’s goal is to analyze what features best predict apartment rental prices across New York City. In particular, the goal is to identify which economic, geographic, and lifestyle factors are most strongly associated with median asking rent of an individual apartment. We analyzed features on both the individual apartment level and neighborhood level to quantify how much individual characteristics impact pricing compared to community characteristics.
+This project’s goal is to analyze what features best influences apartment rental prices across New York City. In particular, the goal is to identify which economic, geographic, and lifestyle factors are most strongly associated with the expected asking rent of an individual apartment. We analyzed features on both the individual apartment level and neighborhood level to quantify how much individual apartment features impact pricing compared to the neighborhood’s community characteristics.
 
-To address this question, a wide range of data was collected at both the apartment and neighborhood levels. At the apartment level, features such as the number of bedrooms and bathrooms, as well as building amenities like in-unit laundry and doorman services, were included. At the neighborhood level, more general characteristics were gathered, including average apartment sale prices, measures of neighborhood safety, school quality, and accessibility factors such as ease of movement and transportation options. Statistical methods, including LASSO regression, random forest regression, multiple linear regression, were then applied to identify the most important predictors of rent and quantify their impact.
+To address this question, a wide range of data was collected at both the apartment and neighborhood levels. At the apartment level, features such as the number of bedrooms and bathrooms, as well as building amenities like in-unit laundry and doorman services, were included. At the neighborhood level, more general characteristics were gathered, including average apartment sale prices, measures of neighborhood safety, school quality, and accessibility factors such as ease of movement, transportation options, and distance from downtown measured as the distance from the world trade center.  For the statistical methods, we implemented LASSO regression, random forest regression, and multilinear regressions. The use of regularization was considered, and feature selection was heavily influenced by random forests to find the most important predictors of rent,and by using the multilinear regression to find the relationship of the features to rents.
 
 The goal of this analysis is to better understand the key drivers of rental pricing in New York City and determine whether factors such as accessibility and amenities have a measurable impact beyond basic economic indicators like income and property values.
 
@@ -23,7 +23,7 @@ In addition to the automated cleaning, a small number of issues were fixed using
 
 This approach helped active an impactful increase in overlap between datasets (from 9 common names to 37) so they could be joined together. Once standardized, the datasets were successfully merged using the neighborhood field, and values were aggregated when needed to make a consistent neighborhood-level dataset for analysis.
 
-\########## Going to talk about where data is from, why features were chosen, and strengenths & limitations next, —— may move this section about issues to later but leaving here for now.######
+Going to talk about where data is from, why features were chosen, and strengenths & limitations next, —— may move this section about issues to later but leaving here for now.
 
 ```{r}
 1 + 1
@@ -37,5 +37,3 @@ You can add options to executable code like this
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
-
-#Update
