@@ -120,7 +120,20 @@ apartments_full <- apartments_full |>
 sum(is.na(apartments_full$median_income))
 
 apartments_full <- apartments_full |> filter(!(bedrooms == 0 & bathrooms == 0 & price >= 8000))
+
 apartments_full |> filter(bedrooms == 0 & bathrooms == 0) |> arrange(desc(price))
+
+library(geosphere)
+
+apartments_full <- apartments_full |>
+  mutate(
+    dist_to_cbd_km = distHaversine(
+      cbind(longitude, latitude),
+      c(-74.0134, 40.7128)
+    ) / 1000
+  )
+head(apartments_full[,'dist_to_cbd_km'])
+
 
 # bathroom, bedroom, elevator, in.unit.wash.dryer, in.building.wash.dryer, fitness.center, outdoor.space, doorman, near_restaurants_1_5_miles, moderate_restaurants_3_miles, vacancy_rate, median_income
 
@@ -154,11 +167,67 @@ apartments_full <- apartments_full |>
     furnished = factor(furnished)
   )
 
-full_model2 <- lm(log(price) ~ bathrooms + I(bathrooms^2) + bedrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + outdoor.space + doorman + near_restaurants_1_5_miles + moderate_restaurants_3_miles + vacancy_rate + log(median_income), data=apartments_full)
+full_model2 <- lm(log(price) ~ bathrooms + I(bathrooms^2) + bedrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + outdoor.space + doorman + near_restaurants_1_5_miles + moderate_restaurants_3_miles + vacancy_rate + log(median_income) + dist_to_cbd_km, data=apartments_full)
 summary(full_model2)
 
-car::crPlots(full_model2)
-plot(full_model2)
+full_model3 <- lm(log(price) ~ bathrooms * dist_to_cbd_km + 
+               I(bathrooms^2) * dist_to_cbd_km +
+               bedrooms * dist_to_cbd_km + 
+               elevator * dist_to_cbd_km + 
+               in.unit.wash.dryer * dist_to_cbd_km + 
+               in.building.wash.dryer + 
+               fitness.center * dist_to_cbd_km + 
+               outdoor.space * dist_to_cbd_km + 
+               doorman * dist_to_cbd_km + 
+               near_restaurants_1_5_miles + moderate_restaurants_3_miles + 
+               vacancy_rate + log(median_income), data = apartments_full)
+anova(full_model2, full_model3)
+summary(full_model3)
+
+plot(full_model3)
+
+car::vif(full_model3, type='predictor')
+
+cor(apartments_full$dist_to_cbd_km, log(apartments_full$median_income), use = "complete.obs")
+
+model4 <- update(full_model3, . ~ . - log(median_income))
+car::vif(model4, type='predictor')
+
+apartments_full <- apartments_full %>%
+  mutate(bathrooms_c = bathrooms - mean(bathrooms))
+
+apartments_full <- apartments_full %>%
+  mutate(dist_to_cbd_c = dist_to_cbd_km - mean(dist_to_cbd_km))
+
+model3 <- lm(log(price) ~ bathrooms_c  * dist_to_cbd_c  + 
+               I(bathrooms_c ^2)  +
+               bedrooms * dist_to_cbd_c  + 
+               elevator * dist_to_cbd_c  + 
+               in.unit.wash.dryer * dist_to_cbd_c  + 
+               in.building.wash.dryer + 
+               fitness.center * dist_to_cbd_c  + 
+               outdoor.space * dist_to_cbd_c  + 
+               doorman * dist_to_cbd_c  + 
+               near_restaurants_1_5_miles + moderate_restaurants_3_miles + 
+               vacancy_rate + median_income, data = apartments_full) 
+summary(model3)
+car::vif(model3, type='predictor')
+
+model4 <- lm(log(price) ~ bathrooms_c  * dist_to_cbd_c  + 
+                         I(bathrooms_c ^2)  +
+                         bedrooms * dist_to_cbd_c  + 
+                         elevator * dist_to_cbd_c  + 
+                         in.unit.wash.dryer * dist_to_cbd_c  + 
+                         in.building.wash.dryer + 
+                         fitness.center * dist_to_cbd_c  + 
+                         outdoor.space * dist_to_cbd_c  + 
+                         doorman * dist_to_cbd_c  + 
+                         moderate_restaurants_3_miles + 
+                         vacancy_rate + median_income, data = apartments_full) 
+summary(model4)
+car::vif(model4, type='predictor')
+plot(model4)
+
 
 # still looks pretty bad so 
 library(lmtest)
@@ -168,20 +237,10 @@ library(MASS)
 coeftest(full_model2, vcov = vcovHC(full_model2, type = "HC1"))
 # outdoor.space no longer significant
 
-robust_model <- rlm(log(price) ~ bathrooms + I(bathrooms^2) + bedrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + outdoor.space + doorman + near_restaurants_1_5_miles + moderate_restaurants_3_miles + vacancy_rate + log(median_income), data=apartments_full)
+robust_model <- rlm(log(price) ~ bathrooms + I(bathrooms^2) + bedrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + outdoor.space + doorman + near_restaurants_1_5_miles + moderate_restaurants_3_miles + vacancy_rate + log(median_income) + dist_to_cbd_km, data=apartments_full)
 summary(robust_model)
 car::crPlots(robust_model)
 
-predictors_in_model <- c('bathrooms', 'bedrooms', 'elevator', 'in.unit.wash.dryer', 'in.building.wash.dryer', 'fitness.center', 'outdoor.space', 'doorman', 'near_restaurants_1_5_miles', 'moderate_restaurants_3_miles', 'vacancy_rate', 'median_income')
-
-sapply(predictors_in_model, function(x) sum(is.na(apartments_full[[x]])))
-"                   bathrooms                     bedrooms                     elevator           in.unit.wash.dryer 
-                           0                            0                            0                            0 
-      in.building.wash.dryer               fitness.center                outdoor.space                      doorman 
-                           0                            0                            0                            0 
-  near_restaurants_1_5_miles moderate_restaurants_3_miles                 vacancy_rate                median_income 
-                           0                            0                          853                            0 
-"
 apartments_full <- apartments_full |> filter(!is.na(neighborhood_master))
 
 plot(robust_model)
