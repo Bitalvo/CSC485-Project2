@@ -27,15 +27,28 @@ In addition to the automated cleaning, a small number of issues were fixed using
 
 The dataset used in this analysis has several key strengths that make it useful for regression analysis. First, it combines information from multiple categories, which creates a more comprehensive view of neighborhood characteristics. By incorporating economic, geographic, and amenity-based variables, the dataset doesn’t become siloed into just an economic analysis or just a geographic analysis but looks at a multitude of factors that may influence rental prices. Additionally, the use of feature engineering to create composite scores (like movement, restaurant, and green space indices) helps reduce complexity and makes the data more useable. The final dataset also covers a large area of New York City, with 37 neighborhoods included in the analysis. However, the dataset also has several limitations. As mentioned before, one major challenge is the inconsistency in how neighborhoods are defined across different data sources, which require significant cleaning and mapping. While this process improved the number of neighborhoods covered, it introduced some degree of overlap when aligning different geographic definitions. The lines between neighborhoods are not perfectly defined. Additionally, some variables contained missing data, which reduced the number of usable observations in certain models and may impact the reliability of those results. For example, the green score didn’t contain neighborhood level data. To solve this issue, the median green score of each borough was taken and applied to its neighborhoods.
 
+## Methodology
+
+Here...
+
+Methodology for Neighborhood analysis below…can cut down if need be
+
+The goal of the neighborhood level analysis was to identify which characteristics best predict rental prices across New York City neighborhoods. Given the high number of variables collected and the likelihood of correlation between them, we used a multi-step modeling approach to isolate the most important predictors. The first step in our analysis was to run a LASSO regression model which we chose because it performs both variable selection and regularization. This allowed us to choose a subset of meaningful predictors from the larger group of potentially correlated variables. The LASSO results showed that only a few variables, such as median income, market sale price per unit, bike score, early education enrollment, and total green acers contributed meaningful explanatory power, while most others were effectively removed.
+
+One result that surprised us was the total green acers having a negative lambda of -5.235, but upon closer inspection this makes sense. The most expensive rent prices are in Manhattan, and the green space data includes all boroughs in NYC. Boroughs like Staten Island and Brooklyn have lower rents than Manhattan because of more supply and less demand for apartments, but these places also have more green space overall. This led us to the conclusion that green space is more of a location proxy to Manhattan, rather than a contribution factor to rental pricing.
+
+Following the LASSO regression, we used liner regression models to better understand the relationships between key neighborhood features and average rental prices in those neighborhoods. The result of the second model showed that market sale price per unit was the main predictor, explaining a large portion of variation in rent (R² ≈ 0.91). However, when we included it in a multiple regression model, this variable overshadowed all others, suggesting that property sale values act as a strong proxy for many neighborhood features.
+
+To try and isolate the effects of the underlying neighborhood features, we introduced composite scores and re-ran our model. We created a composite score for education, movement, restaurants, and green space. We also decided to exclude sale price per unit in the revised regression to see if we could maintain explanatory power with the less impactful predictors. We were pleased to see this model maintain strong explanatory power (R² ≈ 0.83) and identified median income, vacancy rate, and green space as significant predictors of rent, while movement and restaurant variables were not statistically significant. These results suggest that, beyond property values, economic conditions and broader geographic features play the most important role in determining rental prices.
+
+## Results
+
+Here...
+
 ```{r}
-1 + 1
+#R block for whatever we need
 ```
 
-You can add options to executable code like this
+## Conclusion
 
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
+Here...
