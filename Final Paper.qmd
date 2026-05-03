@@ -29,6 +29,8 @@ The dataset used in this analysis has several key strengths that make it useful 
 
 ## Methodology
 
+#### Neighborhood
+
 Here...
 
 Methodology for Neighborhood analysis below…can cut down if need be
@@ -41,11 +43,67 @@ Following the LASSO regression, we used liner regression models to better unders
 
 To try and isolate the effects of the underlying neighborhood features, we introduced composite scores and re-ran our model. We created a composite score for education, movement, restaurants, and green space. We also decided to exclude sale price per unit in the revised regression to see if we could maintain explanatory power with the less impactful predictors. We were pleased to see this model maintain strong explanatory power (R² ≈ 0.83) and identified median income, vacancy rate, and green space as significant predictors of rent, while movement and restaurant variables were not statistically significant. These results suggest that, beyond property values, economic conditions and broader geographic features play the most important role in determining rental prices.
 
+#### Apartments
+
+Once the neighborhoods dataset was thoroughly analyzed, we extracted key features such as \[“median_income”, “green_score”, “vacancy_rate”\] and combined it to the apartment dataset. Similarly, like the neighborhood dataset, we had considerably many features within the apartment dataset; considering that we also extracted the impactful features from neighborhood to the apartment dataset. So, we began doing feature engineering by using models such as Ridge Regression, LASSO Regression, and Random Forest to help find significance in features. This analysis was heavily reliant on random forest calculation of features' significance.
+
+##### Base Feature Model:
+
+This was our first model to help us find possible significant features. It held only values of apartment features and no neighborhood qualities were applied as predictors
+
+properties such as median_income , green_score, and vacancy_rate where excluded as predictors in the model
+
+![](images/Model_Orginal_RAW.png){fig-align="center" width="518"}
+
+The Base Model performed very poorly with their respective R² scores. The Ridge regression got a score of 0.4535 and the LASSO regression got a score of 0.4555. The random forest however got a greater score than both the prior regressions models with a score of 0.6085. This score was further improved by deducting the insignificant features random forest calculated, which improved the R² score to 0.6233. Note that all three of these models used numerical features of only apartments excluding the neighborhood features.
+
+![](images/model_raw_performance_R.png){fig-align="center" width="374"}
+
+In this analysis the best features were:
+
+![](images/model_raw_best_features.png){fig-align="center" width="472"}
+
+##### Combined Feature Model:
+
+This held values of apartment features and neighborhood features. Properties such as median_income , green_score, and vacancy_rate where added as predictors for the models. We discovered that having median_income and vacancy_rate improved our model by a R² of .1 which was significant. While, green_score was held to a lower decree by the random forest thus excluded out as a predictor. And, for the apartment features it reflected identically to the Base Model’s best features.
+
+However, we found that the dataset contained many NA values for example 13499 worth of median_income where missing when we combined the neighborhood to the apartment dataset. This was a major problem as the models omitted all the values that were missing. This brought our scope of 37 neighborhoods to 27. Losing about ten unique neighborhoods all together and only retained about 35,679 instances of the 49,299. As a result, we filled the missing median_income values with the values that were gather by the government of the United States census for median incomes. By using zip codes, we were able to locate accurately the specified instance location. This allowed us to fill in the best possible values provided by the census to the median_income. (Appendix: Data.census/gov)
+
+Later on, we also found that within the apartment dataset there were abnormal outliers within the apartment dataset’s features. These instances we found with rental price ranging in the 10,000\$ with no bedroom or bathroom. For this reason, we created a threshold of no rent greater than or equal to 8000\$ should have zero bathrooms or bedrooms. We didn’t want to remove all of them as we assumed of possible scenarios were such a case could occur to make the model retain real world variables.
+
+![](images/badData_proof.png){fig-align="center" width="251"}
+
+After we had removed the abnormal outliers given their price \< 8,000\$ we ran another model.
+
+##### Final Feature Model:
+
+Fill the median_income with the Median values of median_income, and removed rentals with zero bathrooms and bedrooms with price \>= 8,000\$. This model retained 48,429 instances of the 49,299. And this also retained 36 unique neighborhoods of the 37. The Final Model performed moderately great with their respective R² scores. The Ridge regression got a R² score of 0.5381 and LASOO regression got a score of 0.5378. The random forest got a R² of 0.7526 with all the apartment features and the all the significant neighborhood features as it’s predictor. However, the best features that were used for the Base Model’s random forest had a negative influence on the model’s R\^2 score, resulting in a score of .74817.
+
+![](images/predictors.png){fig-align="center" width="353"}
+
+##### Continuation of Final Feature Model:
+
+To find the optimal R² score we proceeded with the full random forest model which contained all of the predictors. And through the process of deducting features that the random forest calculated was insignificant we got a new feature table. 
+
+![](images/bestFeatures.png){fig-align="center" width="471"}
+
+The neighborhood features: “vacancy_rate” and “median_income” were recommended to be added as predictors. This indicated a strong significant impact that the neighborhood features had on the model. While the “vacancy_rate” and “median_income” were excluded in the base model, the improvement of the R² score was apparent for the Base Model with it’s best features, but this was not so for the Final Feature Model. The imputation of neighborhood caused a change resulting in a new best feature table that positively impacted the R² score to increase to a 0.7789.
+
+The old Final Feature Model:
+
+![](images/Model_filled_bestNotBest.png){fig-align="center" width="540"}
+
+The new Final Feature Model:
+
+![](images/model_filled_bestModelBest.png){fig-align="center" width="516" height="324"}
+
+Though not a big visual change, the results of the data interpretations in the new model increased from a R² score of 0.7481 to 0.7789.
+
 ## Results
 
 #### Model Overview
 
-Our final linear model regresses log(price) on a combination of unit and neighborhood level features and includes interaction terms capturing how unit-level premiums vary within distance from downtown Manhattan (centered on the World Trade Center). The model uses 48,395 rental listings across 36 NYC neighborhoods, achieving an adjusted ![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAbCAMAAACkwzTUAAAAAXNSR0IArs4c6QAAAF1QTFRFAAAAAAAAAAA6AABmADpmADqQAGa2OgAAOmaQOma2OpDbZgAAZjqQZpDbZrb/kDoAkGY6kNv/tmYAtmY6tpA6ttv/tv//25A627Zm2////7Zm/9uQ/9u2//+2///bjNe98gAAAAF0Uk5TAEDm2GYAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAAZdEVYdFNvZnR3YXJlAE1pY3Jvc29mdCBPZmZpY2V/7TVxAAAAlklEQVQoU9WQQRbCIAxEk1aliopStdaW3P+YMgHb0ufSjdlAhrw/E4h+W+OFefNYMcWdaLS7b04eqjhGVc09jQR7xiGujqSnqa6qtof06qFSx9q2+0xdqpOYZz0Ir21P4dh/CHIDIFgYxxdw9ZojTFnB7XidHWpMrTHn0gyDSbiCAHoxLE63Gky9MMQ/qByj5GVLg3/o3iEzBqNKS7YmAAAAAElFTkSuQmCC) of 0.736, indicating that our model explains approximately 74% of the variation in log rental price. Due to persistent heteroskedasticity at higher fitted values, we report HC1 heteroskedasticity-consistent standard errors through. As a robustness check, we also fit the model using Huber M-estimation (rlm). The coefficient estimates were substantively unchanged, confirming that our findings are not driven by outlying observations.
+Our final linear model regresses log(price) on a combination of unit and neighborhood level features and includes interaction terms capturing how unit-level premiums vary within distance from downtown Manhattan (centered on the World Trade Center). The model uses 48,395 rental listings across 36 NYC neighborhoods, achieving an adjusted R² of 0.736, indicating that our model explains approximately 74% of the variation in log rental price. Due to persistent heteroskedasticity at higher fitted values, we report HC1 heteroskedasticity-consistent standard errors through. As a robustness check, we also fit the model using Huber M-estimation (rlm). The coefficient estimates were substantively unchanged, confirming that our findings are not driven by outlying observations.
 
 #### Unit-level Features
 
