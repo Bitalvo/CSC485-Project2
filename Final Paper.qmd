@@ -33,7 +33,11 @@ To begin, we first did LASSO and random forest regression on the unit level data
 
 ![The Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² of 0.6085](images/clipboard-1348377745.png)
 
+<<<<<<< HEAD
 ![![](images/clipboard-3734808285.png)The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
+=======
+![The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
+>>>>>>> a2553c0 (checked sentence structure and fixed from typos)
 
 We did not create a linear model at this stage, because we believed that the R² of such a model would be too low for confident inference on the apartments.
 
@@ -47,9 +51,9 @@ Following the LASSO regression, we used liner regression models to better unders
 
 To try and isolate the effects of the underlying neighborhood features, we introduced composite scores and re-ran our model. We created a composite score for education, movement, restaurants, and green space. We also decided to exclude sale price per unit in the revised regression to see if we could maintain explanatory power with the less impactful predictors. We were pleased to see this model maintain strong explanatory power (R² ≈ 0.83) and identified median income, vacancy rate, and green space as significant predictors of rent, while movement and restaurant variables were not statistically significant. These results suggest that, beyond property values, economic conditions and broader geographic features play the most important role in determining rental prices.
 
-Once the neighborhoods dataset was thoroughly analyzed, we extracted the key features the LASSO regression had isolated; median_income, green_score, vacancy_rate, and restaurants_3_miles, and joined them onto the apartment dataset. As before, we began doing variable selection by using Random Forest regressions to capture the significant features within the combined model. We found that from the new predictors median_income, and vacancy_rate where significant predictors within the combined model, while, green_score was mostly exclueded from the random forest, and so was excluded as a predictor going forward.
+Once the neighborhoods dataset was thoroughly analyzed, we extracted the key features the LASSO regression had isolated; median_income, green_score, and vacancy_rate which we joined onto the apartment dataset. As before, we began doing variable selection by using Random Forest regressions to capture the significant features within the combined model. We found that from the new predictors median_income, and vacancy_rate where significant predictors within the combined model, while, green_score was calculated as insignificant by the random forest, and so was excluded as a predictor going forward.
 
-![Our final random forest model on the combined datatset, with only significant predictors. R² = 0.748](images/clipboard-4227080777.png)
+![Our final random forest model on the combined dataset, with only significant predictors. R² = 0.748](images/clipboard-4227080777.png)
 
 Finally, we then used these variables to create a linear regression model, regressing on log(price) because we suspected the dataset to be right skew. The model performed decently, obtaining an adjusted R² of 0.7046. However, it had clear issues with heteroskedasticity, and despite logging price, wide tails and right skew.
 
@@ -107,11 +111,11 @@ At the unit level, the number of bathrooms, bedrooms and doorman status are the 
 
 At the neighborhood level, proximity to downtown was the strongest predictor, with each additional kilometer from the CBD associated with approximately 4.5% lower rent. Neighborhood median income, restaurant density, and vacancy rate all contribute significant additional explanatory power. Together, these findings confirm that renters are paying for both what is inside their apartment and for where it is located.
 
-Perhaps the most interesting finding was from our interactions, that amenity premiums are not constant across the city. The doorman premium nearly doubles comparing downtown units to units in the outer boroughs, while counterintuitively, outdoor space becomes increasingly associated with lower rents further from the city center. These findings suggest that the same amenity carries different market signals depending on its geographic location within the city.
+Perhaps the most interesting finding was from our interactions, that amenity premiums are not constant across the city. The doorman premium nearly doubles comparing downtown units to units in the outer boroughs, while counter-intuitively, outdoor space becomes increasingly associated with lower rents further from the city center. These findings suggest that the same amenity carries different market signals depending on its geographic location within the city.
 
 ### Limitations
 
-Several limitations should be noted. First, our unit data originates from RentalHop listings from 2017, which is unlikely to fully reflect current-post covid market conditions. Second, our residual analysis indicates persistent heteroskedasticity, heavy tails and right skew. We addressed the heteroskedasticity using H1C robust standard errors, and confirmed coefficient stability using Huber M-estimation, but acknowledge that features such as unit finishes, views, floor levels, and building prestige are likely to drive the remaining unexplained variance. Additionally, around 1700\~ observations were excluded due to missing neighborhood features, and median incomes and vacancy rates for certain neighborhoods were imbued with the calculated median of the surrounding areas. Finally,  our neighborhood features, while significant, do not capture the full set of characteristics that make a neighborhood desirable. Subjective qualities such as “vibe”, perceived safety, and school quality could not be included due to the data being too sparse.
+Several limitations should be noted. First, our unit data originates from RentalHop listings from 2017, which is unlikely to fully reflect current-post Covid market conditions. Second, our residual analysis indicates persistent heteroskedasticity, heavy tails and right skew. We addressed the heteroskedasticity using H1C robust standard errors, and confirmed coefficient stability using Huber M-estimation, but acknowledge that features such as unit finishes, views, floor levels, and building prestige are likely to drive the remaining unexplained variance. Additionally, around 1700\~ observations were excluded due to missing neighborhood features, and median incomes and vacancy rates for certain neighborhoods were imbued with the calculated median of the surrounding areas. Finally, our neighborhood features, while significant, do not capture the full set of characteristics that make a neighborhood desirable. Subjective qualities such as “vibe”, perceived safety, and school quality could not be included due to the data being too sparse.
 
 ### Implications
 
