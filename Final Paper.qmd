@@ -31,9 +31,9 @@ The dataset used in this analysis has several key strengths that make it useful 
 
 To begin, we first did LASSO and random forest regression on the unit level dataset, to find significant predictors and measure predictor strength to determine if higher order or interaction effects were necessary from the apartment dataset.
 
-![The Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² of 0.6085](images/clipboard-1348377745.png){alt="The Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² of 0.6085"}
+![The Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² of 0.6085](images/clipboard-1348377745.png)
 
-![The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png){alt="The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233."}
+![![](images/clipboard-3734808285.png)The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
 
 We did not create a linear model at this stage, because we believed that the R² of such a model would be too low for confident inference on the apartments.
 
