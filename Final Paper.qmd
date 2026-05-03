@@ -11,7 +11,7 @@ Over the past decade, data analytics has become an essential tool for understand
 
 This project’s goal is to analyze what features best influences apartment rental prices across New York City. In particular, the goal is to identify which economic, geographic, and lifestyle factors are most strongly associated with the expected asking rent of an individual apartment. We analyzed features on both the individual apartment level and neighborhood level to quantify how much individual apartment features impact pricing compared to the neighborhood’s community characteristics.
 
-To address this question, a wide range of data was collected at both the apartment and neighborhood levels. At the apartment level, features such as the number of bedrooms and bathrooms, as well as building amenities like in-unit laundry and doorman services, were included. At the neighborhood level, more general characteristics were gathered, including average apartment sale prices, measures of neighborhood safety, school quality, and accessibility factors such as ease of movement, transportation options, and distance from downtown measured as the distance from the world trade center.  For the statistical methods, we implemented LASSO regression, random forest regression, and multilinear regressions. The use of regularization was considered, and feature selection was heavily influenced by random forests to find the most important predictors of rent,and by using the multilinear regression to find the relationship of the features to rents.
+To address this question, a wide range of data was collected at both the apartment and neighborhood levels. At the apartment level, features such as the number of bedrooms and bathrooms, as well as building amenities like in-unit laundry and doorman services, were included. At the neighborhood level, more general characteristics were gathered, including average apartment sale prices, measures of neighborhood safety, school quality, and accessibility factors such as ease of movement, transportation options, and distance from downtown measured as the distance from the world trade center. For the statistical methods, we implemented LASSO regression, random forest regression, and multilinear regressions. The use of regularization was considered, and feature selection was heavily influenced by random forests to find the most important predictors of rent,and by using the multilinear regression to find the relationship of the features to rents.
 
 The goal of this analysis is to better understand the key drivers of rental pricing in New York City and determine whether factors such as accessibility and amenities have a measurable impact beyond basic economic indicators like income and property values.
 
@@ -33,11 +33,9 @@ To begin, we first did LASSO and random forest regression on the unit level data
 
 ![The Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² of 0.6085](images/clipboard-1348377745.png)
 
-<<<<<<< HEAD
-![![](images/clipboard-3734808285.png)The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
-=======
 ![The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
->>>>>>> a2553c0 (checked sentence structure and fixed from typos)
+
+![The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
 
 We did not create a linear model at this stage, because we believed that the R² of such a model would be too low for confident inference on the apartments.
 
@@ -71,7 +69,7 @@ This model performed better than expected, with an adjusted R² of 0.7336, howev
 
 #### Model Overview
 
-Our final linear model regresses log(price) on a combination of unit and neighborhood level features and includes interaction terms capturing how unit-level premiums vary within distance from downtown Manhattan (centered on the World Trade Center). The model uses 48,395 rental listings across 36 NYC neighborhoods, achieving an adjusted $R^2$ of 0.736, indicating that our model explains approximately 74% of the variation in log rental price. Due to persistent heteroskedasticity at higher fitted values, we report HC1 heteroskedasticity-consistent standard errors through. As a robustness check, we also fit the model using Huber M-estimation (rlm). The coefficient estimates were substantively unchanged, confirming that our findings are not driven by outlying observations.
+Our final linear model regresses log(price) on a combination of unit and neighborhood level features and includes interaction terms capturing how unit-level premiums vary within distance from downtown Manhattan (centered on the World Trade Center). The model uses 48,395 rental listings across 36 NYC neighborhoods, achieving an adjusted $R^2$ of 0.736, indicating that our model explains approximately 74% of the variation in log rental price. Due to persistent heteroskedasticity at higher fitted values, we report HC1 heteroskedasticity-consistent standard errors through. As a robustness check, we also fit the model using Huber M-estimation (rlm). The coefficient estimates were substantively unchanged, confirming that our findings are not driven by outlying observations.
 
 #### Unit-level Features
 
