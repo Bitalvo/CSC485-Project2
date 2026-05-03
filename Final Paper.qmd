@@ -67,7 +67,7 @@ In this analysis the best features were:
 
 This held values of apartment features and neighborhood features. Properties such as median_income , green_score, and vacancy_rate where added as predictors for the models. We discovered that having median_income and vacancy_rate improved our model by a R² of .1 which was significant. While, green_score was held to a lower decree by the random forest thus excluded out as a predictor. And, for the apartment features it reflected identically to the Base Model’s best features.
 
-However, we found that the dataset contained many NA values for example 13499 worth of median_income where missing when we combined the neighborhood to the apartment dataset. This was a major problem as the models omitted all the values that were missing. This brought our scope of 37 neighborhoods to 27. Losing about ten unique neighborhoods all together and only retained about 35,679 instances of the 49,299. As a result, we filled the missing median_income values with the values that were gather by the government of the United States census for median incomes. By using zip codes, we were able to locate accurately the specified instance location. This allowed us to fill in the best possible values provided by the census to the median_income. (Appendix: Data.census/gov)
+However, we found that the dataset contained many NA values for example 13499 worth of median_income where missing when we combined the neighborhood to the apartment dataset. This was a major problem as the models omitted all the values that were missing. This brought our scope of 37 neighborhoods to 27. Losing about ten unique neighborhoods all together and only retained about 35,679 instances of the 49,299. As a result, to avoid exclusion bias, we filled the missing median_income values with the values that were gather by the government of the United States census for median incomes. By using zip codes, we were able to locate accurately the specified instance location. This allowed us to fill in the best possible values provided by the census to the median_income. (Appendix: Data.census/gov)
 
 Later on, we also found that within the apartment dataset there were abnormal outliers within the apartment dataset’s features. These instances we found with rental price ranging in the 10,000\$ with no bedroom or bathroom. For this reason, we created a threshold of no rent greater than or equal to 8000\$ should have zero bathrooms or bedrooms. We didn’t want to remove all of them as we assumed of possible scenarios were such a case could occur to make the model retain real world variables.
 
@@ -89,11 +89,11 @@ To find the optimal R² score we proceeded with the full random forest model whi
 
 The neighborhood features: “vacancy_rate” and “median_income” were recommended to be added as predictors. This indicated a strong significant impact that the neighborhood features had on the model. While the “vacancy_rate” and “median_income” were excluded in the base model, the improvement of the R² score was apparent for the Base Model with it’s best features, but this was not so for the Final Feature Model. The imputation of neighborhood caused a change resulting in a new best feature table that positively impacted the R² score to increase to a 0.7789.
 
-The old Final Feature Model:
+**The Old Final Feature Model:**
 
 ![](images/Model_filled_bestNotBest.png){fig-align="center" width="540"}
 
-The new Final Feature Model:
+**The New Final Feature Model:**
 
 ![](images/model_filled_bestModelBest.png){fig-align="center" width="516" height="324"}
 
