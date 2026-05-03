@@ -35,8 +35,6 @@ To begin, we first did LASSO and random forest regression on the unit level data
 
 ![The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
 
-![The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
-
 We did not create a linear model at this stage, because we believed that the R² of such a model would be too low for confident inference on the apartments.
 
 As a result, we then moved on to the neighborhood analysis and subsequent conjoining of the two datasets and analyses. The goal of analyzing the neighborhood characteristics was to identify which features best predict average rental prices across New York City neighborhoods, as we believe that if we could accurately capture the relative effect of the neighborhood on unit price, we could then accurately isolate the unit level features effects on price.
