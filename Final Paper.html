@@ -123,14 +123,14 @@ window.Quarto = {
 <section id="results" class="level2">
 <h2 class="anchored" data-anchor-id="results">Results</h2>
 <p>To begin, we first did LASSO and random forest regression on the unit level dataset, to find significant predictors and measure predictor strength to determine if higher order or interaction effects were necessary from the apartment dataset.</p>
-<p>We found that the the Apartment Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² score of 0.6085.</p>
+<p>We found that the the Apartment Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² score of 0.6085 (see Figure 1).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/clipboard-1348377745.png" class="img-fluid figure-img"></p>
 <figcaption>Figure 1: Comparison of R² values for base model including all variables.</figcaption>
 </figure>
 </div>
-<p>Afterwards, removing insignificant features calculated by random forest we manage to raise the model’s R² score of random forest to .6233</p>
+<p>Afterwards, removing insignificant features calculated by random forest we manage to raise the model’s R² score of random forest to .6233 (see Figure 2).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/clipboard-3734808285.png" class="img-fluid figure-img"></p>
@@ -143,14 +143,14 @@ window.Quarto = {
 <p>One result that surprised us was the total green acers having a negative lambda of -5.235, but upon closer inspection this makes sense. The most expensive rent prices are in Manhattan, and the green space data includes all boroughs in NYC. Boroughs like Staten Island and Brooklyn have lower rents than Manhattan because of more supply and less demand for apartments, but these places also have more green space overall. This led us to the conclusion that green space is more of a location proxy to Manhattan, rather than a contribution factor to rental pricing.</p>
 <p>Following the LASSO regression, we used liner regression models to better understand the relationships between key neighborhood features and average rental prices in those neighborhoods. The result of the second model showed that market sale price per unit was the main predictor, explaining a large portion of variation in rent (R² ≈ 0.91). However, when we included it in a multiple regression model, this variable overshadowed all others, suggesting that property sale values act as a strong proxy for many neighborhood features.</p>
 <p>To try and isolate the effects of the underlying neighborhood features, we introduced composite scores and re-ran our model. We created a composite score for education, movement, restaurants, and green space. We also decided to exclude sale price per unit in the revised regression to see if we could maintain explanatory power with the less impactful predictors. We were pleased to see this model maintain strong explanatory power (R² ≈ 0.83) and identified median income, vacancy rate, and green space as significant predictors of rent, while movement and restaurant variables were not statistically significant. These results suggest that, beyond property values, economic conditions and broader geographic features play the most important role in determining rental prices.</p>
-<p>Once the neighborhoods dataset was thoroughly analyzed, we extracted the key features the LASSO regression had isolated; median_income, green_score, and vacancy_rate which we joined onto the apartment dataset. As before, we began doing variable selection by using Random Forest regressions to capture the significant features within the combined model. We found that from the new predictors median_income, and vacancy_rate where significant predictors within the combined model, while, green_score was calculated as insignificant by the random forest, and so was excluded as a predictor going forward.</p>
+<p>Once the neighborhoods dataset was thoroughly analyzed, we extracted the key features the LASSO regression had isolated; median_income, green_score, and vacancy_rate which we joined onto the apartment dataset. As before, we began doing variable selection by using Random Forest regressions to capture the significant features within the combined model. We found that from the new predictors median_income, and vacancy_rate where significant predictors within the combined model, while, green_score was calculated as insignificant by the random forest, and so was excluded as a predictor going forward (see Figure 3).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/clipboard-4227080777.png" class="img-fluid figure-img"></p>
 <figcaption>Figure 3: Our final random forest model on the combined dataset, with only significant predictors. R² = 0.748</figcaption>
 </figure>
 </div>
-<p>Finally, we then used these variables to create a linear regression model, regressing on log(price) because we suspected the dataset to be right skew. The model performed decently, obtaining an adjusted R² of 0.7046. However, it had clear issues with heteroskedasticity, and despite logging price, wide tails and right skew.</p>
+<p>Finally, we then used these variables to create a linear regression model, regressing on log(price) because we suspected the dataset to be right skew. The model performed decently, obtaining an adjusted R² of 0.7046. However, it had clear issues with heteroskedasticity, and despite logging price, wide tails and right skew (see Figure 4 and 5).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/clipboard-57054439.png" class="img-fluid figure-img"></p>
@@ -163,7 +163,7 @@ window.Quarto = {
 <figcaption>Figure 5: Plot showing clear wide-tails and right skew in the linear regression model</figcaption>
 </figure>
 </div>
-<p>We also calculated the VIF of each variable, which came out to be under the threshold for problematic multicollinearity for each predictor, and created component residual plots showing that bathrooms had a non-linear effect. Because the heteroskedasticity was so extreme, we suspected there was a confounding variable we had missed. To counteract this, we added in the variable dist_to_cbd_km, which measured the distance from any given unit to the World Trade Center. We hoped this variable would capture some of the value of neighborhoods in NYC that was causing the heteroskedasticity, wide tails, and right skew. Additionally, we added interaction effects into the model for bathrooms, bedrooms, elevator, in unit washer and dryer, fitness center, outdoor space and doorman. The variable dist_to_cbd_km is coded so that it increases the further away from the world trade center the unit is. We then ran an F-test over these interaction effects. Which was highly significant.</p>
+<p>We also calculated the VIF of each variable, which came out to be under the threshold for problematic multicollinearity for each predictor, and created component residual plots showing that bathrooms had a non-linear effect. Because the heteroskedasticity was so extreme, we suspected there was a confounding variable we had missed. To counteract this, we added in the variable dist_to_cbd_km, which measured the distance from any given unit to the World Trade Center. We hoped this variable would capture some of the value of neighborhoods in NYC that was causing the heteroskedasticity, wide tails, and right skew. Additionally, we added interaction effects into the model for bathrooms, bedrooms, elevator, in unit washer and dryer, fitness center, outdoor space and doorman. The variable dist_to_cbd_km is coded so that it increases the further away from the world trade center the unit is. We then ran an F-test over these interaction effects. Which was highly significant (see Figure 6).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/clipboard-4071534833.png" class="img-fluid figure-img"></p>
