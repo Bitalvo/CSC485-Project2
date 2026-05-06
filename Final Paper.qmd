@@ -15,6 +15,8 @@ To address this question, a wide range of data was collected at both the apartme
 
 The goal of this analysis is to better understand the key drivers of rental pricing in New York City and determine whether factors such as accessibility and amenities have a measurable impact beyond basic economic indicators like income and property values.
 
+talk about choice of models, why you picked what you did explain your workflow, how one thing led to others, etc. explain any extra technicalities that arose
+
 ## Data Overview
 
 To answer our original questions, we had to gather a wide range of data which we categorized into two sections: The neighborhood dataset, and the apartment dataset. The neighborhood dataset acts as a supplement to the apartment dataset which the project is mainly based on. It contains aggregated information from 37 neighborhoods across New York City, with each row representing a new area.
@@ -29,11 +31,23 @@ The dataset used in this analysis has several key strengths that make it useful 
 
 ## Methodology
 
+To analyze rental prices in New York City, we used both apartment-level and neighborhood-level datasets containing a large number of features. Because the project involved many potential predictor variables, feature selection became an important step before constructing the final regression model. Since linear regression was selected as the primary model for interpretation, Ridge regression, LASSO regression, and Random Forest models were first used to identify the most significant features and reduce the impact of less informative variables. LASSO regression was particularly useful because it can shrink some coefficients to zero, effectively removing unnecessary features, while Ridge regression helped reduce overfitting. Random Forest was also included to evaluate nonlinear relationships and feature importance.
+
+To better understand the contribution of different feature groups, separate base models were initially created for apartment-level and neighborhood-level datasets. The Apartment Base Model included features such as bathrooms, bedrooms, interest level, outdoor space, dishwasher availability, elevator access, pool access, and furnished status. The Neighborhood Base Model included variables such as median income, green score, vacancy rate, and graduation rate. After evaluating the results from these independent models, the apartment and neighborhood datasets were merged into a combined dataset. Ridge regression, LASSO regression, and Random Forest models were then applied again to evaluate performance on the updated dataset and identify the strongest overall predictors of rental price.
+
+Finally, a multiple linear regression model was developed using the selected features in order to analyze the relationships between apartment and neighborhood characteristics and rental prices in New York City.
+
+## Results
+
 To begin, we first did LASSO and random forest regression on the unit level dataset, to find significant predictors and measure predictor strength to determine if higher order or interaction effects were necessary from the apartment dataset.
 
-![The Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² of 0.6085](images/clipboard-1348377745.png)
+We found that the the Apartment Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² score of 0.6085. 
 
-![The final random forest model, based solely on unit-level features, managed to improve the R² to 0.6233.](images/clipboard-3734808285.png)
+![Figure 1: Comparison of R² values for base model including all variables.](images/clipboard-1348377745.png)
+
+Afterwards, removing insignificant features calculated by random forest we manage to raise the model's R² score of random forest to .6233
+
+![Figure 2: The best features of the final random forest model, based solely on unit-level features](images/clipboard-3734808285.png)
 
 We did not create a linear model at this stage, because we believed that the R² of such a model would be too low for confident inference on the apartments.
 
@@ -49,21 +63,19 @@ To try and isolate the effects of the underlying neighborhood features, we intro
 
 Once the neighborhoods dataset was thoroughly analyzed, we extracted the key features the LASSO regression had isolated; median_income, green_score, and vacancy_rate which we joined onto the apartment dataset. As before, we began doing variable selection by using Random Forest regressions to capture the significant features within the combined model. We found that from the new predictors median_income, and vacancy_rate where significant predictors within the combined model, while, green_score was calculated as insignificant by the random forest, and so was excluded as a predictor going forward.
 
-![Our final random forest model on the combined dataset, with only significant predictors. R² = 0.748](images/clipboard-4227080777.png)
+![Figure 3: Our final random forest model on the combined dataset, with only significant predictors. R² = 0.748](images/clipboard-4227080777.png)
 
 Finally, we then used these variables to create a linear regression model, regressing on log(price) because we suspected the dataset to be right skew. The model performed decently, obtaining an adjusted R² of 0.7046. However, it had clear issues with heteroskedasticity, and despite logging price, wide tails and right skew.
 
-![Plot showing clear heteroskedasticity in the linear regression model](images/clipboard-57054439.png)
+![Figure 4: Plot showing clear heteroskedasticity in the linear regression model](images/clipboard-57054439.png)
 
-![Plot showing clear wide-tails and right skew in the linear regression model](images/clipboard-3651035174.png)
+![Figure 5: Plot showing clear wide-tails and right skew in the linear regression model](images/clipboard-3651035174.png)
 
 We also calculated the VIF of each variable, which came out to be under the threshold for problematic multicollinearity for each predictor, and created component residual plots showing that bathrooms had a non-linear effect. Because the heteroskedasticity was so extreme, we suspected there was a confounding variable we had missed. To counteract this, we added in the variable dist_to_cbd_km, which measured the distance from any given unit to the World Trade Center. We hoped this variable would capture some of the value of neighborhoods in NYC that was causing the heteroskedasticity, wide tails, and right skew. Additionally, we added interaction effects into the model for bathrooms, bedrooms, elevator, in unit washer and dryer, fitness center, outdoor space and doorman. The variable dist_to_cbd_km is coded so that it increases the further away from the world trade center the unit is. We then ran an F-test over these interaction effects. Which was highly significant.
 
-![F-test over the interaction effects](images/clipboard-4071534833.png)
+![Figure 6: F-test over the interaction effects](images/clipboard-4071534833.png)
 
 This model performed better than expected, with an adjusted R² of 0.7336, however the structural heteroskedasticity, wide tails, and right skew remained. As a result, we had to fit another model using Huber M-estimation and H1C, which is robust to heteroskedasticity. The coefficients and standard errors were substantially unchanged, showing that the findings were not driven by outlying observations.
-
-## Results
 
 #### Model Overview
 

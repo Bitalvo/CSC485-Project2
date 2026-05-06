@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Peter Bitalvo, William Johnston, Youkta Rai">
+
+<title>Analysis of Manhattan Rent &amp; Neighborhoods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="Final Paper_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Final Paper_files/libs/quarto-html/quarto.js"></script>
+<script src="Final Paper_files/libs/quarto-html/popper.min.js"></script>
+<script src="Final Paper_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Final Paper_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Final Paper_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Final Paper_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Final Paper_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Final Paper_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Final Paper_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Analysis of Manhattan Rent &amp; Neighborhoods</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Peter Bitalvo, William Johnston, Youkta Rai </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Over the past decade, data analytics has become an essential tool for understanding real estate markets, especially in massive complex markets like New York City. For example, rental prices are influenced by a wide range of factors like income accessibility, amenities, neighborhood, and so much more. While there are many contribution factors, it’s difficult to determine which of these truly drive rental prices, and how they interact with one another.</p>
+<p>This project’s goal is to analyze what features best influences apartment rental prices across New York City. In particular, the goal is to identify which economic, geographic, and lifestyle factors are most strongly associated with the expected asking rent of an individual apartment. We analyzed features on both the individual apartment level and neighborhood level to quantify how much individual apartment features impact pricing compared to the neighborhood’s community characteristics.</p>
+<p>To address this question, a wide range of data was collected at both the apartment and neighborhood levels. At the apartment level, features such as the number of bedrooms and bathrooms, as well as building amenities like in-unit laundry and doorman services, were included. At the neighborhood level, more general characteristics were gathered, including average apartment sale prices, measures of neighborhood safety, school quality, and accessibility factors such as ease of movement, transportation options, and distance from downtown measured as the distance from the world trade center. For the statistical methods, we implemented LASSO regression, random forest regression, and multilinear regressions. The use of regularization was considered, and feature selection was heavily influenced by random forests to find the most important predictors of rent,and by using the multilinear regression to find the relationship of the features to rents.</p>
+<p>The goal of this analysis is to better understand the key drivers of rental pricing in New York City and determine whether factors such as accessibility and amenities have a measurable impact beyond basic economic indicators like income and property values.</p>
+<p>talk about choice of models, why you picked what you did explain your workflow, how one thing led to others, etc. explain any extra technicalities that arose</p>
+</section>
+<section id="data-overview" class="level2">
+<h2 class="anchored" data-anchor-id="data-overview">Data Overview</h2>
+<p>To answer our original questions, we had to gather a wide range of data which we categorized into two sections: The neighborhood dataset, and the apartment dataset. The neighborhood dataset acts as a supplement to the apartment dataset which the project is mainly based on. It contains aggregated information from 37 neighborhoods across New York City, with each row representing a new area.</p>
+<p>The neighborhood data began with determining a set of features that were “must-have” and “nice-to-have.” Within the “must-have” category, we identified subway accessibility and restaurant/nightlife density as essential variables. These features were selected because they capture two critical aspects of living in a large city: mobility and amenities. Areas with greater access to subway stations are typically more desirable due to increased ease of transportation, while neighborhoods with a higher concentration of restaurants and nightlife options tend to offer more leisure opportunities, which can contribute to higher demand and, ultimately, higher rental prices. More features like walk and transit scores, green space availability, median household income, school district quality, and average rent were also collected and categorized as “nice-to-have” variables. While these factors provide useful context and may influence rental prices, they were not completely essential to the models we planned on running. They were included to improve the models and capture broad characteristics of neighborhood quality, allowing us to determine if these characteristics add actual explanatory power beyond the features listed in the “must-have” category. Because this analysis included many different data sources the next step was to figure out how to join each feature to a common item. Most datasets included a neighborhood name, so this was the common denominator when cleaning and appending into a final neighborhood data frame.</p>
+<p>It’s important to note that neighborhood names are not recorded the same across the datasets we had gathered. This proved to be a difficult obstacle when cleaning and creating the final neighborhood data set. For example, the dataset for average asking rent used names such as “Chelsea” and “Murray Hill Kips Bay” while the dataset for school information used “Chelsea/Clinton” or “Murray Hill/Stuyvesant” because school districts are recorded differently. To address this issue, neighborhood names were standardized across all datasets using a combination of automated cleaning and targeted mapping. This process involved changing all names to the same format (lowercase, removing punctuation, and trimming spaces), as well as splitting combined neighborhood names where needed. For example, rows like “Chelsea/Clinton” were separated into individual neighborhoods to match with other datasets.</p>
+<p>In addition to the automated cleaning, a small number of issues were fixed using targeted mappings to match similar or overlapping neighborhood definitions. The rent dataset was used as the base reference, or “truth”, and other datasets were adjusted to match its naming structure as closely as possible. This approach helped achieve an impactful increase in overlap between datasets (from 9 common names to 37) so they could be joined together. Once standardized, the datasets were successfully merged using the neighborhood field, and values were aggregated when needed to make a consistent neighborhood-level dataset for analysis.</p>
+<p>The dataset used in this analysis has several key strengths that make it useful for regression analysis. First, it combines information from multiple categories, which creates a more comprehensive view of neighborhood characteristics. By incorporating economic, geographic, and amenity-based variables, the dataset doesn’t become siloed into just an economic analysis or just a geographic analysis but looks at a multitude of factors that may influence rental prices. Additionally, the use of feature engineering to create composite scores (like movement, restaurant, and green space indices) helps reduce complexity and makes the data more useable. The final dataset also covers a large area of New York City, with 37 neighborhoods included in the analysis. However, the dataset also has several limitations. As mentioned before, one major challenge is the inconsistency in how neighborhoods are defined across different data sources, which require significant cleaning and mapping. While this process improved the number of neighborhoods covered, it introduced some degree of overlap when aligning different geographic definitions. The lines between neighborhoods are not perfectly defined. Additionally, some variables contained missing data, which reduced the number of usable observations in certain models and may impact the reliability of those results. For example, the green score didn’t contain neighborhood level data. To solve this issue, the median green score of each borough was taken and applied to its neighborhoods.</p>
+</section>
+<section id="methodology" class="level2">
+<h2 class="anchored" data-anchor-id="methodology">Methodology</h2>
+<p>To analyze rental prices in New York City, we used both apartment-level and neighborhood-level datasets containing a large number of features. Because the project involved many potential predictor variables, feature selection became an important step before constructing the final regression model. Since linear regression was selected as the primary model for interpretation, Ridge regression, LASSO regression, and Random Forest models were first used to identify the most significant features and reduce the impact of less informative variables. LASSO regression was particularly useful because it can shrink some coefficients to zero, effectively removing unnecessary features, while Ridge regression helped reduce overfitting. Random Forest was also included to evaluate nonlinear relationships and feature importance.</p>
+<p>To better understand the contribution of different feature groups, separate base models were initially created for apartment-level and neighborhood-level datasets. The Apartment Base Model included features such as bathrooms, bedrooms, interest level, outdoor space, dishwasher availability, elevator access, pool access, and furnished status. The Neighborhood Base Model included variables such as median income, green score, vacancy rate, and graduation rate. After evaluating the results from these independent models, the apartment and neighborhood datasets were merged into a combined dataset. Ridge regression, LASSO regression, and Random Forest models were then applied again to evaluate performance on the updated dataset and identify the strongest overall predictors of rental price.</p>
+<p>Finally, a multiple linear regression model was developed using the selected features in order to analyze the relationships between apartment and neighborhood characteristics and rental prices in New York City.</p>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p>To begin, we first did LASSO and random forest regression on the unit level dataset, to find significant predictors and measure predictor strength to determine if higher order or interaction effects were necessary from the apartment dataset.</p>
+<p>We found that the the Apartment Base Model performed poorly with their respective R² scores. The Ridge regression had an R² of 0.4535 and the LASSO regression had an R² of 0.4555. The random forest performed better, as expected, obtaining an R² score of 0.6085.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-1348377745.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1: Comparison of R² values for base model including all variables.</figcaption>
+</figure>
+</div>
+<p>Afterwards, removing insignificant features calculated by random forest we manage to raise the model’s R² score of random forest to .6233</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-3734808285.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2: The best features of the final random forest model, based solely on unit-level features</figcaption>
+</figure>
+</div>
+<p>We did not create a linear model at this stage, because we believed that the R² of such a model would be too low for confident inference on the apartments.</p>
+<p>As a result, we then moved on to the neighborhood analysis and subsequent conjoining of the two datasets and analyses. The goal of analyzing the neighborhood characteristics was to identify which features best predict average rental prices across New York City neighborhoods, as we believe that if we could accurately capture the relative effect of the neighborhood on unit price, we could then accurately isolate the unit level features effects on price.</p>
+<p>Given the high number of variables collected and the likelihood of correlation between them, we used a multi-step modeling approach to isolate the most important predictors. The first step in our analysis was to run a LASSO regression model which we chose because it performs both variable selection and regularization. This allowed us to choose a subset of meaningful predictors from the larger group of potentially correlated variables. The LASSO results showed that only a few variables, such as median income, market sale price per unit, bike score, early education enrollment, and total green acers contributed meaningful explanatory power, while most others were effectively removed.</p>
+<p>One result that surprised us was the total green acers having a negative lambda of -5.235, but upon closer inspection this makes sense. The most expensive rent prices are in Manhattan, and the green space data includes all boroughs in NYC. Boroughs like Staten Island and Brooklyn have lower rents than Manhattan because of more supply and less demand for apartments, but these places also have more green space overall. This led us to the conclusion that green space is more of a location proxy to Manhattan, rather than a contribution factor to rental pricing.</p>
+<p>Following the LASSO regression, we used liner regression models to better understand the relationships between key neighborhood features and average rental prices in those neighborhoods. The result of the second model showed that market sale price per unit was the main predictor, explaining a large portion of variation in rent (R² ≈ 0.91). However, when we included it in a multiple regression model, this variable overshadowed all others, suggesting that property sale values act as a strong proxy for many neighborhood features.</p>
+<p>To try and isolate the effects of the underlying neighborhood features, we introduced composite scores and re-ran our model. We created a composite score for education, movement, restaurants, and green space. We also decided to exclude sale price per unit in the revised regression to see if we could maintain explanatory power with the less impactful predictors. We were pleased to see this model maintain strong explanatory power (R² ≈ 0.83) and identified median income, vacancy rate, and green space as significant predictors of rent, while movement and restaurant variables were not statistically significant. These results suggest that, beyond property values, economic conditions and broader geographic features play the most important role in determining rental prices.</p>
+<p>Once the neighborhoods dataset was thoroughly analyzed, we extracted the key features the LASSO regression had isolated; median_income, green_score, and vacancy_rate which we joined onto the apartment dataset. As before, we began doing variable selection by using Random Forest regressions to capture the significant features within the combined model. We found that from the new predictors median_income, and vacancy_rate where significant predictors within the combined model, while, green_score was calculated as insignificant by the random forest, and so was excluded as a predictor going forward.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-4227080777.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3: Our final random forest model on the combined dataset, with only significant predictors. R² = 0.748</figcaption>
+</figure>
+</div>
+<p>Finally, we then used these variables to create a linear regression model, regressing on log(price) because we suspected the dataset to be right skew. The model performed decently, obtaining an adjusted R² of 0.7046. However, it had clear issues with heteroskedasticity, and despite logging price, wide tails and right skew.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-57054439.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4: Plot showing clear heteroskedasticity in the linear regression model</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-3651035174.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 5: Plot showing clear wide-tails and right skew in the linear regression model</figcaption>
+</figure>
+</div>
+<p>We also calculated the VIF of each variable, which came out to be under the threshold for problematic multicollinearity for each predictor, and created component residual plots showing that bathrooms had a non-linear effect. Because the heteroskedasticity was so extreme, we suspected there was a confounding variable we had missed. To counteract this, we added in the variable dist_to_cbd_km, which measured the distance from any given unit to the World Trade Center. We hoped this variable would capture some of the value of neighborhoods in NYC that was causing the heteroskedasticity, wide tails, and right skew. Additionally, we added interaction effects into the model for bathrooms, bedrooms, elevator, in unit washer and dryer, fitness center, outdoor space and doorman. The variable dist_to_cbd_km is coded so that it increases the further away from the world trade center the unit is. We then ran an F-test over these interaction effects. Which was highly significant.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/clipboard-4071534833.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 6: F-test over the interaction effects</figcaption>
+</figure>
+</div>
+<p>This model performed better than expected, with an adjusted R² of 0.7336, however the structural heteroskedasticity, wide tails, and right skew remained. As a result, we had to fit another model using Huber M-estimation and H1C, which is robust to heteroskedasticity. The coefficients and standard errors were substantially unchanged, showing that the findings were not driven by outlying observations.</p>
+<section id="model-overview" class="level4">
+<h4 class="anchored" data-anchor-id="model-overview">Model Overview</h4>
+<p>Our final linear model regresses log(price) on a combination of unit and neighborhood level features and includes interaction terms capturing how unit-level premiums vary within distance from downtown Manhattan (centered on the World Trade Center). The model uses 48,395 rental listings across 36 NYC neighborhoods, achieving an adjusted <span class="math inline">\(R^2\)</span> of 0.736, indicating that our model explains approximately 74% of the variation in log rental price. Due to persistent heteroskedasticity at higher fitted values, we report HC1 heteroskedasticity-consistent standard errors through. As a robustness check, we also fit the model using Huber M-estimation (rlm). The coefficient estimates were substantively unchanged, confirming that our findings are not driven by outlying observations.</p>
+</section>
+<section id="unit-level-features" class="level4">
+<h4 class="anchored" data-anchor-id="unit-level-features">Unit-level Features</h4>
+<p>Because distance to CBD was mean-centered, the main effect of coefficients represents the estimated premium at the average distance from downtown. All percentage effects are approximate, derived from the log-linear specification.</p>
+<p>The relationship we found between bathrooms and rent appeared to be nonlinear. The linear coefficient (β = 0.218, p &lt; 0.001) and the positive quadratic term (β = 0.067, p &lt; 0.001) together indicate that each additional bathroom is associated with a substantial rent increase, with an accelerating premium at higher bathroom counts. This likely reflects the fact that multi-bathroom apartments in NYC are genuinely rare for luxury units, thus commanding disproportionately large premiums.</p>
+<p>Each extra bedroom is associated with approximately 17% higher rent (β = 0.166, p &lt; 0.001), consistent with the standard per-room pricing convention in the NYC rental market.</p>
+<p>For the binary unit and building amenities, having a doorman commands the highest premium of the features we measured, with a 14% increase in expected rental price holding all other variables constant (β = 0.134, p &lt; 0.001), followed by in unit washer/dryer at 8% (β = 0.080, p &lt; 0.001), elevator at 7% (β = 0.066, p &lt; 0.001), and fitness center at 5% (β = 0.055, p &lt; 0.001). Additionally, we noted that in-building washer/dryer is associated with an approximately 6% lower rent compared to the baseline. We believe that this likely indicates buildings with in-building washer/dryers are generally older and less expensive, rather than that shared laundry facilities decrease the apartment’s value.</p>
+<p>Similarly, outdoor space is associated with approximately 1.3% lower rent (β = –0.013, p &lt; 0.001). We interpret this as outdoor space generally increasing as you get further from downtown, where it signals a ground-floor or low-level unit, rather than luxury apartments associated with premium Manhattan listings.</p>
+</section>
+<section id="neighborhood-level-features" class="level4">
+<h4 class="anchored" data-anchor-id="neighborhood-level-features">Neighborhood-level features</h4>
+<p>Distance from the CBD (World Trade Center) is the single strongest neighborhood-level predictor we found in our model. Each additional kilometer from downtown is associated with approximately 4.5% lower rent (β = –0.045, p &lt; 0.001), demonstrating the expected effect centrality premium in NYC’s rental market.</p>
+<p>Neighborhood median household income is positively associated with rent (β = 0.0000157, p &lt; 0.001). While the per-dollar coefficient appears small, this translates to meaningful effects across the income distribution: a $50,000 difference in neighborhood median income is associated with approximately 8% higher rent, all else equal.</p>
+<p>Restaurant density within 3 miles has a small but statistically significant positive association with rent (β = 0.003, p &lt; 0.001), serving as a proxy for neighborhood vibrancy and commercial activity. Vacancy rate is negatively associated with rent (β = –0.018, p &lt; 0.001), confirming that tighter rental markets with lower vacancy command higher prices.</p>
+</section>
+<section id="interaction-effects-how-location-modifies-amenity-premiums" class="level3">
+<h3 class="anchored" data-anchor-id="interaction-effects-how-location-modifies-amenity-premiums">Interaction Effects: How Location Modifies Amenity Premiums</h3>
+<p>A key finding of this analysis is that unit-level amenity premiums are not uniform across the city. The inclusion of interaction terms between unit features and distance to CBD significantly improved model fit (F = 197.37, p &lt; 0.001 via nested ANOVA), and revealed several substantively interesting patterns.</p>
+<p>The doorman premium increases further from downtown (β<em>interaction</em> = 0.017, p &lt; 0.001). At the mean distance, a doorman adds ~14% to rent; 10 km further out, this premium grows to approximately 31%. This likely reflects that doorman buildings are rarer and more differentiated in outer boroughs, making them a stronger signal of building quality relative to their surroundings.</p>
+<p>The bedroom premium also increases with distance (β<em>interaction</em> = 0.006, p &lt; 0.001), suggesting that additional space is valued more in areas where larger apartments are the norm. The in-unit washer/dryer premium similarly increases with distance from CBD (β<em>interaction</em> = 0.007, p &lt; 0.001).</p>
+<p>Conversely, outdoor space becomes even less valuable further from the CBD (β<em>interaction</em> = –0.003, p &lt; 0.001), reinforcing the interpretation that outdoor space in the outer boroughs is associated with lower-quality housing stock rather than premium amenities.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This project’s goal is to analyze what features best influences apartment rental prices across New York City. In particular, the goal is to identify which economic, geographic, and lifestyle factors are most strongly associated with the expected asking rent of an individual apartment. Using approximately 48,000 rental listings and a log-linear regression model, we find that both in-unit and neighborhood features matter substantially, but in distinct ways.</p>
+<p>At the unit level, the number of bathrooms, bedrooms and doorman status are the dominant predictors. A doorman building commands the single largest binary amenity premium at roughly 14% at the average location. In-unit washer/dryer ad elevator access add meaningful premiums of 8% and 7% respectively, while in-building washer is negatively associated with rent—a finding that underscores the importance of interpreting amenity variables in context, not just the amenity itself.</p>
+<p>At the neighborhood level, proximity to downtown was the strongest predictor, with each additional kilometer from the CBD associated with approximately 4.5% lower rent. Neighborhood median income, restaurant density, and vacancy rate all contribute significant additional explanatory power. Together, these findings confirm that renters are paying for both what is inside their apartment and for where it is located.</p>
+<p>Perhaps the most interesting finding was from our interactions, that amenity premiums are not constant across the city. The doorman premium nearly doubles comparing downtown units to units in the outer boroughs, while counter-intuitively, outdoor space becomes increasingly associated with lower rents further from the city center. These findings suggest that the same amenity carries different market signals depending on its geographic location within the city.</p>
+<section id="limitations" class="level3">
+<h3 class="anchored" data-anchor-id="limitations">Limitations</h3>
+<p>Several limitations should be noted. First, our unit data originates from RentalHop listings from 2017, which is unlikely to fully reflect current-post Covid market conditions. Second, our residual analysis indicates persistent heteroskedasticity, heavy tails and right skew. We addressed the heteroskedasticity using H1C robust standard errors, and confirmed coefficient stability using Huber M-estimation, but acknowledge that features such as unit finishes, views, floor levels, and building prestige are likely to drive the remaining unexplained variance. Additionally, around 1700~ observations were excluded due to missing neighborhood features, and median incomes and vacancy rates for certain neighborhoods were imbued with the calculated median of the surrounding areas. Finally, our neighborhood features, while significant, do not capture the full set of characteristics that make a neighborhood desirable. Subjective qualities such as “vibe”, perceived safety, and school quality could not be included due to the data being too sparse.</p>
+</section>
+<section id="implications" class="level3">
+<h3 class="anchored" data-anchor-id="implications">Implications</h3>
+<p>For renters, our results provide a data-driven framework for understanding what they are paying for when they sign a lease in New York City. The findings suggest that a prospective renter weighing up a doorman building in Brooklyn versus a non-doorman building in Manhattan face a larger premium than they may expect, and that amenities like outdoor space may not command the premium one might intuitively assume. For future work, incorporating additional spatial features, such as subway proximity, school district quality, and street-level data could further improve the models explanatory power and provide even more granular guidance for NYC apartment seekers.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
