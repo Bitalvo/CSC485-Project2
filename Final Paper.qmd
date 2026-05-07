@@ -1,7 +1,9 @@
 ---
 title: "Analysis of New York City Rent & Neighborhoods" 
 author: "Peter Bitalvo, William Johnston, Youkta Rai" 
-format: html 
+format:
+  html:
+    self-contained: true
 editor: visual 
 ---
 
