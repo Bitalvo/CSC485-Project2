@@ -53,6 +53,15 @@ apartments_filtered[15469,] # Looks fine too
 apartments_lm2 <- lm(log(price) ~ bedrooms + bathrooms + elevator + in.unit.wash.dryer + in.building.wash.dryer + fitness.center + doorman + near_restaurants_1_5_miles, data=apartments_filtered)
 summary(apartments_lm2)
 
+crPlot(your_linear_model, variable = "bathrooms",
+       main = "Component + Residual Plot: Bathrooms",
+       xlab = "Number of Bathrooms",
+       ylab = "Component + Residual (log(price))",
+       col = "gray30",
+       pch = 1,
+       cex = 0.5,
+       smooth = list(col = "red", lwd = 2),
+       line = list(col = "blue", lwd = 2, lty = 2))
 
 # Round 2)
 # 21247, 31297, 10647
@@ -224,6 +233,7 @@ model4 <- lm(log(price) ~ bathrooms_c  * dist_to_cbd_c  +
                          fitness.center * dist_to_cbd_c  + 
                          outdoor.space * dist_to_cbd_c  + 
                          doorman * dist_to_cbd_c  + 
+                         dist_to_cbd_c +
                          moderate_restaurants_3_miles + 
                          vacancy_rate + median_income, data = apartments_full) 
 summary(model4)
@@ -236,7 +246,7 @@ library(lmtest)
 library(sandwich)
 library(MASS)
 
-coeftest(full_model2, vcov = vcovHC(full_model2, type = "HC1"))
+coeftest(model4, vcov = vcovHC(full_model2, type = "HC1"))
 # outdoor.space no longer significant
 
 robust_model <- rlm(log(price) ~ bathrooms_c  * dist_to_cbd_c  + 
